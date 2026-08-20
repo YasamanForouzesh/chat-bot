@@ -1,5 +1,5 @@
-from adapter.anthropic import Anthropic
-from adapter.openai_adapter import OpenAIAdapter
+from .anthropic import Anthropic
+from .openai_adapter import OpenAIAdapter
 
 
 def llm_helper(model: str, provider: str):

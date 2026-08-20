@@ -1,4 +1,4 @@
-from adapter.baseAdapter import BaseAdapter
+from .baseAdapter import BaseAdapter
 from openai import OpenAI
 
 
