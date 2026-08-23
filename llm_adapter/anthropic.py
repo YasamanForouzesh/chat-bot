@@ -7,9 +7,9 @@ class Anthropic(BaseAdapter):
         super().__init__(model)
         self.client = anthropic.Anthropic()
 
-    def generate(self, prompt):
+    def generate(self, prompt: str, system_prompt):
         message = self.client.messages.create(
             model=self.model,
             messages=prompt,
         )
-        return message
+        return response.content[0].text

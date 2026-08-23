@@ -7,10 +7,27 @@ class OpenAIAdapter(BaseAdapter):
         super().__init__(model)
         self.client = OpenAI()
 
-    def generate(self, prompt):
+    def generate(
+        self,
+        prompt: str,
+        system_prompt: str | None = None
+    ):
+        messages = []
+
+        if system_prompt:
+            messages.append({
+                "role": "system",
+                "content": system_prompt
+            })
+
+        messages.append({
+            "role": "user",
+            "content": prompt
+        })
+
         response = self.client.responses.create(
             model=self.model,
-            input=prompt,
+            input=messages,
         )
 
-        return response
+        return response.output_text

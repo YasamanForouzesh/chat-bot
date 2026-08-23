@@ -1,10 +1,10 @@
-from llm_adapter.helper import llm_helper
+from llm_adapter.helper import llmFactory
 from dotenv import load_dotenv
 load_dotenv()
 def chat():
-    llm = llm_helper("gpt-4.1-nano", "openai")
+    llm = llmFactory("gpt-4.1-nano", "openai")
     rsp = llm.generate("hello tell one small and quick joke for who immigrate from Iran to USA to undrestand LA culcutre.")
-    return rsp.output_text
+    return rsp
 
 
 def main():
