@@ -19,7 +19,7 @@ class Anthropic(BaseAdapter):
             if message.role == "developer":
                 raise ValueError("Anthropic does not support the developer role.")
 
-            if index == 0 and message.role == "user" :
+            if index != 0 and message.role == "user" :
                  raise ValueError("Anthropic first role has to be user.")
             
             if message.role not in allowed_roles:
@@ -27,6 +27,8 @@ class Anthropic(BaseAdapter):
                     f"Invalid role '{message.role}' at index {index}. "
                     "Anthropic supports: user, assistant."
                 )
+            cleaned_messages.append(message)
+
             if index != 0:
                 previous_role = cleaned_messages[index - 1].role
                 current_role = cleaned_messages[index].role
@@ -34,7 +36,6 @@ class Anthropic(BaseAdapter):
                     raise ValueError(
                         "Anthropic message order must alternate between user and assistant."
                     )
-            cleaned_messages.append(message)
 
         if not cleaned_messages:
             raise ValueError("Anthropic requires at least one user or assistant message.")
@@ -42,7 +43,7 @@ class Anthropic(BaseAdapter):
 
         return cleaned_messages
 
-    def generate(self, prompt: list[prompt], system_prompt: str):
+    def generate(self, prompt: list[prompt], system_prompt: str | None = None):
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
 
