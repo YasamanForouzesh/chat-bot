@@ -54,5 +54,3 @@ class Anthropic(BaseAdapter):
         )
         return response.content[0].text
 
-    def systemPrompt(self, version, agent):
-        return super().systemPrompt(version, agent)

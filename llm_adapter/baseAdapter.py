@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Literal
-
 from pydantic import BaseModel
 
 
@@ -23,6 +22,3 @@ class BaseAdapter(ABC):
     ):
         pass
 
-    @abstractmethod
-    def systemPrompt(self, version: str, agent: str):
-        pass

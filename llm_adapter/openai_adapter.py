@@ -46,7 +46,3 @@ class OpenAIAdapter(BaseAdapter):
         )
 
         return response.output_text
-
-            
-    def systemPrompt(self, version, agent):
-        return super().systemPrompt(version, agent)
