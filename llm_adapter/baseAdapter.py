@@ -22,3 +22,7 @@ class BaseAdapter(ABC):
         system_prompt: str | None = None
     ):
         pass
+
+    @abstractmethod
+    def systemPrompt(self, version: str, agent: str):
+        pass

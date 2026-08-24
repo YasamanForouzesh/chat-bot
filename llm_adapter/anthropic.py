@@ -19,7 +19,7 @@ class Anthropic(BaseAdapter):
             if message.role == "developer":
                 raise ValueError("Anthropic does not support the developer role.")
 
-            if index != 0 and message.role == "user" :
+            if index == 0 and message.role != "user" :
                  raise ValueError("Anthropic first role has to be user.")
             
             if message.role not in allowed_roles:
@@ -53,3 +53,6 @@ class Anthropic(BaseAdapter):
             messages=messages,
         )
         return response.content[0].text
+
+    def systemPrompt(self, version, agent):
+        return super().systemPrompt(version, agent)
