@@ -1,4 +1,14 @@
 from abc import ABC, abstractmethod
+from typing import Literal
+
+from pydantic import BaseModel
+
+
+class prompt(BaseModel):
+    role: Literal["user", "assistant", "developer"]
+    content: str
+
+
 
 
 class BaseAdapter(ABC):
@@ -8,7 +18,7 @@ class BaseAdapter(ABC):
     @abstractmethod
     def generate(
         self,
-        prompt: str,
+        prompt: list[prompt],
         system_prompt: str | None = None
     ):
         pass
