@@ -29,8 +29,9 @@ class OpenAIAdapter(BaseAdapter):
     def generate(
         self,
         prompt: list[prompt],
-        system_prompt: str | None = None
-    ):
+        system_prompt: str | None = None,
+        output_schema: Type[BaseModel] | None = None
+    )-> str | BaseModel:
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
 
@@ -39,10 +40,17 @@ class OpenAIAdapter(BaseAdapter):
                 "role": "system",
                 "content": system_prompt,
             })
+        if not output_schema:
+            response = self.client.responses.create(
+                model=self.model,
+                input=messages
+            )
+            return response.output_text
+        else: 
+            response = self.client.responses.parse(
+                model=self.model,
+                input=messages,
+                text_format=output_schema
+            )
 
-        response = self.client.responses.create(
-            model=self.model,
-            input=messages,
-        )
-
-        return response.output_text
+            return response.output_parsed

@@ -1,12 +1,12 @@
 from llm_adapter.helper import llmFactory
 from llm_adapter.baseAdapter import prompt
 from dotenv import load_dotenv
-from prompt_loader import promptLoader
+from prompt_loader import prompt_loader
 load_dotenv()
 
 
 def chat():
-    systemPrompt = promptLoader("v1", "backend")
+    systemPrompt = prompt_loader("v1", "backend")
     llm = llmFactory("gpt-4.1-nano", "openai")
     rsp = llm.generate([
         prompt(

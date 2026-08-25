@@ -18,7 +18,8 @@ class BaseAdapter(ABC):
     def generate(
         self,
         prompt: list[prompt],
-        system_prompt: str | None = None
-    ):
+        system_prompt: str | None = None,
+        output_schema: Type[BaseModel] | None = None
+    )-> str | BaseModel:
         pass
 
