@@ -6,7 +6,7 @@ load_dotenv()
 
 
 def chat():
-    systemPrompt = prompt_loader("v1", "backend")
+    systemPrompt = prompt_loader("backend", "v1")
     llm = llmFactory("gpt-4.1-nano", "openai")
     rsp = llm.generate([
         prompt(
