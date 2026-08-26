@@ -1,5 +1,10 @@
 from .baseAdapter import BaseAdapter, prompt
 import anthropic
+from pydantic import BaseModel
+from typing import Type
+import json
+from anthropic import transform_schema
+from pydantic import TypeAdapter
 
 
 class Anthropic(BaseAdapter):
@@ -43,14 +48,50 @@ class Anthropic(BaseAdapter):
 
         return cleaned_messages
 
-    def generate(self, prompt: list[prompt], system_prompt: str | None = None):
+
+    def generate_schema_config(self, raw_schema: type[BaseModel]):
+        
+
+        # Optionally run Anthropic's transformer to fit Claude API constraints
+        clean_schema = TypeAdapter(raw_schema).json_schema()
+        clean_schema = transform_schema(clean_schema)
+
+        return {
+            "format": {
+                "type": "json_schema",
+                "schema": clean_schema,
+            }
+        }
+    
+    def generate(self, prompt: list[prompt], system_prompt: str | None = None,
+                 output_schema: Type[BaseModel] | None = None):
+
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
+        if output_schema:
+          output_config = self.generate_schema_config(output_schema)
 
+        # the create use the output_config which we have to manually format that
+        # the parse use output_format that we can pass pydantic 
+        # for streaming we should use create
         response = self.client.messages.create(
             model=self.model,
             system=system_prompt,
             messages=messages,
+            output_config=output_config
         )
-        return response.content[0].text
+
+        if not raw_text:
+            return None
+        raw_text = "".join(block.text for block in response.content if block.type == "text")
+        try:
+            data = json.loads(raw_text)
+            is_json_object = isinstance(data, (dict, list))
+        except (json.JSONDecodeError, TypeError):
+            # Step 3: Fall back to treating it as plain prose
+            is_json_object = False
+            data = raw_text
+        return data
+
+
 

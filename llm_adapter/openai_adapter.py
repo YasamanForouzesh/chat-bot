@@ -1,5 +1,7 @@
 from .baseAdapter import BaseAdapter, prompt
 from openai import OpenAI
+from pydantic import BaseModel
+from typing import Type
 
 
 class OpenAIAdapter(BaseAdapter):
