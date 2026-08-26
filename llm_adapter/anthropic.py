@@ -64,8 +64,8 @@ class Anthropic(BaseAdapter):
         }
     
     def generate(self, prompt: list[prompt], system_prompt: str | None = None,
-                 output_schema: Type[BaseModel] | None = None):
-
+                 output_schema: Type[BaseModel] | None = None)-> str | BaseModel:
+        output_config = None
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
         if output_schema:
@@ -81,15 +81,13 @@ class Anthropic(BaseAdapter):
             output_config=output_config
         )
 
+        raw_text = "".join(block.text for block in response.content if block.type == "text")
         if not raw_text:
             return None
-        raw_text = "".join(block.text for block in response.content if block.type == "text")
         try:
             data = json.loads(raw_text)
-            is_json_object = isinstance(data, (dict, list))
         except (json.JSONDecodeError, TypeError):
             # Step 3: Fall back to treating it as plain prose
-            is_json_object = False
             data = raw_text
         return data
 
