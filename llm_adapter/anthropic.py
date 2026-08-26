@@ -65,21 +65,29 @@ class Anthropic(BaseAdapter):
     
     def generate(self, prompt: list[prompt], system_prompt: str | None = None,
                  output_schema: Type[BaseModel] | None = None)-> str | BaseModel:
+        
         output_config = None
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
+
+        request_args = {
+            "model": self.model,
+            "max_tokens": self.max_tokens,
+            "messages": messages,
+        }
+
+        if system_prompt:
+            request_args["system"] = system_prompt
+
+
         if output_schema:
           output_config = self.generate_schema_config(output_schema)
+          request_args["output_config"] = self.generate_schema_config(output_schema)
 
         # the create use the output_config which we have to manually format that
         # the parse use output_format that we can pass pydantic 
         # for streaming we should use create
-        response = self.client.messages.create(
-            model=self.model,
-            system=system_prompt,
-            messages=messages,
-            output_config=output_config
-        )
+        response = self.client.messages.create(**request_args)
 
         raw_text = "".join(block.text for block in response.content if block.type == "text")
         if not raw_text:
