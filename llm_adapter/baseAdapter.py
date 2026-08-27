@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Literal
 from pydantic import BaseModel
 from typing import Type
-
+from models import WebSearchConfig, WebFetchConfig
 
 class prompt(BaseModel):
     role: Literal["user", "assistant", "developer"]
@@ -24,3 +24,18 @@ class BaseAdapter(ABC):
     )-> str | BaseModel:
         pass
 
+
+
+    @abstractmethod
+    def web_search(
+        self,
+        config: WebSearchConfig,
+    ) -> dict:
+        pass
+
+    @abstractmethod
+    def tool_normalizer(
+        self,
+        tools: list,
+    ) -> list[dict]:
+        pass
