@@ -20,22 +20,23 @@ class BaseAdapter(ABC):
         self,
         prompt: list[prompt],
         system_prompt: str | None = None,
-        output_schema: Type[BaseModel] | None = None
+        output_schema: Type[BaseModel] | None = None,
+        tools: list[dict] | None = None
     )-> str | BaseModel:
         pass
 
 
 
-    @abstractmethod
-    def web_search(
-        self,
-        config: WebSearchConfig,
-    ) -> dict:
-        pass
+    # @abstractmethod
+    # def web_search(
+    #     self,
+    #     config: WebSearchConfig,
+    # ) -> dict:
+    #     pass
 
+    @staticmethod
     @abstractmethod
     def tool_normalizer(
-        self,
         tools: list,
     ) -> list[dict]:
         pass

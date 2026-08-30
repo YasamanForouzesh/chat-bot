@@ -2,7 +2,7 @@ from .baseAdapter import BaseAdapter, prompt
 from openai import OpenAI
 from pydantic import BaseModel
 from typing import Type
-
+from models import Tool
 
 class OpenAIAdapter(BaseAdapter):
     def __init__(self, model: str):
@@ -28,11 +28,34 @@ class OpenAIAdapter(BaseAdapter):
 
         return messages
 
+    @staticmethod
+    def tool_normalizer(tools:list)-> list[dict]:
+        normalized = []
+        for tool in tools:
+            if isinstance(tool,Tool):
+                normalized.append({
+                    "type": "function",
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.parameters,
+                    "strict": tool.strict,
+                })
+            elif isinstance(tool, dict):
+                normalized.append(tool)
+
+            else:
+                raise TypeError(f"Unsupported tool type: {type(tool)}")
+
+        return normalized
+
+
+    
     def generate(
         self,
         prompt: list[prompt],
         system_prompt: str | None = None,
-        output_schema: Type[BaseModel] | None = None
+        output_schema: Type[BaseModel] | None = None,
+        tools: list[dict] | None = None
     )-> str | BaseModel:
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
@@ -42,17 +65,20 @@ class OpenAIAdapter(BaseAdapter):
                 "role": "system",
                 "content": system_prompt,
             })
+        
+        request_args = {
+                    "model": self.model,
+                    "input": messages,
+                }
+        if tools:
+            request_args["tools"] = tools
+
         if not output_schema:
-            response = self.client.responses.create(
-                model=self.model,
-                input=messages
-            )
+            response = self.client.responses.create(**request_args)
+            print(response)
             return response.output_text
         else: 
-            response = self.client.responses.parse(
-                model=self.model,
-                input=messages,
-                text_format=output_schema
-            )
-
+            request_args["text_format"]= output_schema
+            response = self.client.responses.parse(**request_args)
+            print(response)
             return response.output_parsed

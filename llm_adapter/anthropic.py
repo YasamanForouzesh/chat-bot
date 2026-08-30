@@ -66,7 +66,6 @@ class Anthropic(BaseAdapter):
     def generate(self, prompt: list[prompt], system_prompt: str | None = None,
                  output_schema: Type[BaseModel] | None = None)-> str | BaseModel:
         
-        output_config = None
         validated_messages = self.validate_messages(prompt)
         messages = [p.model_dump() for p in validated_messages]
 
@@ -81,7 +80,6 @@ class Anthropic(BaseAdapter):
 
 
         if output_schema:
-          output_config = self.generate_schema_config(output_schema)
           request_args["output_config"] = self.generate_schema_config(output_schema)
 
         # the create use the output_config which we have to manually format that
