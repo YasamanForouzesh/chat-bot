@@ -2,13 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Literal
 from pydantic import BaseModel
 from typing import Type
-from models import WebSearchConfig, WebFetchConfig
-
-class prompt(BaseModel):
-    role: Literal["user", "assistant", "developer"]
-    content: str
-
-
+from models import WebSearchConfig, WebFetchConfig, prompt,LLMResponse
 
 
 class BaseAdapter(ABC):
@@ -22,7 +16,7 @@ class BaseAdapter(ABC):
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
         tools: list[dict] | None = None
-    )-> str | BaseModel:
+    )-> LLMResponse:
         pass
 
 

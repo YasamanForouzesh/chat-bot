@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 from typing import Callable
+from pydantic import BaseModel
+from typing import Literal
+
 
 @dataclass
 class WebSearchConfig:
@@ -38,3 +41,21 @@ class Tool:
             "parameters": self.parameters,
             "strict": self.strict,
         }
+
+
+class prompt(BaseModel):
+    role: Literal["user", "assistant", "developer"]
+    content: str
+
+
+
+class ToolCall(BaseModel):
+    id: str
+    name: str
+    arguments: dict
+
+
+class LLMResponse(BaseModel):
+    text: str | None = None
+    parsed: BaseModel | None = None
+    tool_calls: list[ToolCall] | None = None
