@@ -1,8 +1,8 @@
-from .baseAdapter import BaseAdapter, prompt
+from .baseAdapter import BaseAdapter
 from openai import OpenAI
 from pydantic import BaseModel
 from typing import Type
-from models import Tool,LLMResponse,ToolCall
+import models as m
 import json
 
 class OpenAIAdapter(BaseAdapter):
@@ -10,30 +10,12 @@ class OpenAIAdapter(BaseAdapter):
         super().__init__(model)
         self.client = OpenAI()
 
-    @staticmethod
-    def validate_messages(messages: list[prompt]) -> list[prompt]:
-        allowed_roles = {"user", "assistant", "developer"}
-
-        if not messages:
-            raise ValueError("At least one message is required.")
-
-        for index, message in enumerate(messages):
-            if message.role not in allowed_roles:
-                raise ValueError(
-                    f"Invalid role '{message.role}' at index {index}. "
-                    "OpenAI supports: user, assistant, developer."
-                )
-
-            if index == 0 and message.role == "assistant":
-                raise ValueError("The first OpenAI message cannot be from assistant.")
-
-        return messages
 
     @staticmethod
     def tool_normalizer(tools:list)-> list[dict]:
         normalized = []
         for tool in tools:
-            if isinstance(tool,Tool):
+            if isinstance(tool,m.Tool):
                 normalized.append({
                     "type": "function",
                     "name": tool.name,
@@ -50,53 +32,102 @@ class OpenAIAdapter(BaseAdapter):
         return normalized
 
 
-    
+    @staticmethod
+    def normalize_input(
+        items: list[m.prompt | m.ToolCall | m.ToolResult]
+    ) -> list[dict]:
+
+        if not items:
+            raise ValueError("At least one input item is required.")
+
+        normalized = []
+
+        for index, item in enumerate(items):
+
+            if isinstance(item, m.prompt):
+                if item.role not in {"user", "assistant", "developer"}:
+                    raise ValueError(
+                        f"Invalid role '{item.role}' at index {index}"
+                    )
+
+                normalized.append({
+                    "role": item.role,
+                    "content": item.content,
+                })
+
+            elif isinstance(item, m.ToolCall):
+                normalized.append({
+                    "type": "function_call",
+                    "call_id": item.id,
+                    "name": item.name,
+                    "arguments": json.dumps(item.arguments),
+                })
+
+            elif isinstance(item, m.ToolResult):
+                normalized.append({
+                    "type": "function_call_output",
+                    "call_id": item.call_id,
+                    "output": item.result,
+                })
+
+            else:
+                raise TypeError(
+                    f"Unsupported input type: {type(item)}"
+                )
+
+        return normalized
+
     def generate(
         self,
-        prompt: list[prompt],
+        prompt: list[m.prompt | m.ToolCall | m.ToolResult],
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
-        tools: list[dict] | None = None
-    )-> LLMResponse:
-        validated_messages = self.validate_messages(prompt)
-        messages = [p.model_dump() for p in validated_messages]
-        text = None
-        if system_prompt:
-            messages.insert(0, {
-                "role": "system",
-                "content": system_prompt,
-            })
-        
+        tools: list[m.Tool | dict] | None = None
+    ) -> m.LLMResponse:
+
+        input_items = self.normalize_input(prompt)
+
         request_args = {
-                    "model": self.model,
-                    "input": messages,
-                }
+            "model": self.model,
+            "input": input_items,
+        }
+
+        if system_prompt:
+            request_args["instructions"] = system_prompt
+
         if tools:
-            request_args["tools"] = self.tool_normalizer(tools=tools)
+            request_args["tools"] = self.tool_normalizer(tools)
 
-        if not output_schema:
-            response = self.client.responses.create(**request_args)
-            text = response.output_text
-        else: 
-            request_args["text_format"]= output_schema
+        if output_schema:
+            request_args["text_format"] = output_schema
+
             response = self.client.responses.parse(**request_args)
-            print(response.model_dump_json(indent=2))
-            text = response.output_parsed
+
+            text = None
+            parsed = response.output_parsed
+
+        else:
+            response = self.client.responses.create(**request_args)
+
+            text = response.output_text
+            parsed = None
+
         tool_calls = []
-        print(response.output, "------")
+
         for item in response.output:
-
             if item.type == "function_call":
-
                 tool_calls.append(
-                    ToolCall(
+                    m.ToolCall(
                         id=item.call_id,
                         name=item.name,
                         arguments=json.loads(item.arguments),
                     )
                 )
 
-        return LLMResponse(
-            text=text or None,
+        return m.LLMResponse(
+            text=text,
+            parsed=parsed,
             tool_calls=tool_calls,
         )
+
+

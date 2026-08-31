@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 from pydantic import BaseModel
 from typing import Literal
+from pydantic import Field
 
 
 @dataclass
@@ -48,6 +49,9 @@ class prompt(BaseModel):
     content: str
 
 
+class ToolResult(BaseModel):
+    call_id: str
+    result: str
 
 class ToolCall(BaseModel):
     id: str
@@ -58,4 +62,4 @@ class ToolCall(BaseModel):
 class LLMResponse(BaseModel):
     text: str | None = None
     parsed: BaseModel | None = None
-    tool_calls: list[ToolCall] | None = None
+    tool_calls: list[ToolCall] = Field(default_factory=list)

@@ -1,11 +1,11 @@
-from .baseAdapter import BaseAdapter, prompt
+from .baseAdapter import BaseAdapter
 import anthropic
 from pydantic import BaseModel
 from typing import Type
 import json
 from anthropic import transform_schema
 from pydantic import TypeAdapter
-
+import models as m
 
 class Anthropic(BaseAdapter):
     def __init__(self, model: str):
@@ -13,7 +13,7 @@ class Anthropic(BaseAdapter):
         self.client = anthropic.Anthropic()
 
     @staticmethod
-    def validate_messages(messages: list[prompt]) -> list[prompt]:
+    def validate_messages(messages: list[m.prompt]) -> list[m.prompt]:
         allowed_roles = {"user", "assistant"}
         cleaned_messages = []
 
@@ -63,7 +63,7 @@ class Anthropic(BaseAdapter):
             }
         }
     
-    def generate(self, prompt: list[prompt], system_prompt: str | None = None,
+    def generate(self, prompt: list[m.prompt], system_prompt: str | None = None,
                  output_schema: Type[BaseModel] | None = None)-> str | BaseModel:
         
         validated_messages = self.validate_messages(prompt)

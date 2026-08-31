@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Literal
 from pydantic import BaseModel
 from typing import Type
-from models import WebSearchConfig, WebFetchConfig, prompt,LLMResponse
-
+import models as m
 
 class BaseAdapter(ABC):
     def __init__(self, model: str):
@@ -12,11 +11,11 @@ class BaseAdapter(ABC):
     @abstractmethod
     def generate(
         self,
-        prompt: list[prompt],
+        prompt: list[m.prompt | m.ToolResult],
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
-        tools: list[dict] | None = None
-    )-> LLMResponse:
+        tools: list[m.Tool | dict] | None = None
+    )-> m.LLMResponse:
         pass
 
 
