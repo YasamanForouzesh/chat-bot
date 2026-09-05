@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Any, Callable
 from pydantic import BaseModel
 from typing import Literal
 from pydantic import Field
@@ -30,6 +30,7 @@ class Tool:
     parameters: dict
     func: Callable
     strict: bool = False
+    additionalProperties: bool = False
 
 
     def __call__(self, *args, **kwds):
@@ -41,6 +42,7 @@ class Tool:
             "description": self.description,
             "parameters": self.parameters,
             "strict": self.strict,
+            "additionalProperties": self.additionalProperties
         }
 
 
@@ -51,7 +53,8 @@ class prompt(BaseModel):
 
 class ToolResult(BaseModel):
     call_id: str
-    result: str
+    name: str
+    result: Any
 
 class ToolCall(BaseModel):
     id: str

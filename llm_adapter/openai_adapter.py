@@ -77,6 +77,7 @@ class OpenAIAdapter(BaseAdapter):
 
         return normalized
 
+
     def generate(
         self,
         prompt: list[m.prompt | m.ToolCall | m.ToolResult],
@@ -131,3 +132,39 @@ class OpenAIAdapter(BaseAdapter):
         )
 
 
+
+
+    def agent(
+        self,
+        prompt: list[m.prompt | m.ToolCall | m.ToolResult],
+        system_prompt: str | None = None,
+        output_schema: Type[BaseModel] | None = None,
+        tools: list[m.Tool | dict] | None = None,
+    ) -> str | BaseModel:
+
+        while True:
+            response = self.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                output_schema=output_schema,
+                tools=tools,
+            )
+
+            # no tool calls -> final answer
+            if not response.tool_calls:
+                return response.parsed or response.text
+
+            tool_results = []
+
+            for tool_call in response.tool_calls:
+                result = self.execute_tool(
+                    tool_call=tool_call,
+                    tools=tools,
+                )
+
+                tool_results.append(result)
+
+            # model needs to see both:
+            # what it called + what the tool returned
+            prompt.extend(response.tool_calls)
+            prompt.extend(tool_results)

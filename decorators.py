@@ -3,7 +3,7 @@ from pydantic import create_model
 from models import Tool
 
 
-def tool(*, strict: bool = False):
+def tool(*, strict: bool = False, additionalProperties: bool = False):
 
     def decorator(func):
 
@@ -44,6 +44,7 @@ def tool(*, strict: bool = False):
             parameters=parameters,
             func=func,
             strict=strict,
+            additionalProperties=strict if strict else additionalProperties
         )
 
     return decorator

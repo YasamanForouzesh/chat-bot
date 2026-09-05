@@ -17,30 +17,30 @@ def chat():
         )
     ]
 
-    rsp = llm.generate(
+    rsp = llm.agent(
         messages,
         system_prompt,
         tools=[get_weather]
     )
 
-    messages.extend(rsp.tool_calls)
+    # messages.extend(rsp.tool_calls)
 
-    for tool_call in rsp.tool_calls:
-        if tool_call.name == "get_weather":
-            tool_resp = get_weather(**tool_call.arguments)
+    # for tool_call in rsp.tool_calls:
+    #     if tool_call.name == "get_weather":
+    #         tool_resp = get_weather(**tool_call.arguments)
 
-            messages.append(
-                ToolResult(
-                    call_id=tool_call.id,
-                    result=tool_resp
-                )
-            )
+    #         messages.append(
+    #             ToolResult(
+    #                 call_id=tool_call.id,
+    #                 result=tool_resp
+    #             )
+    #         )
 
-    rsp = llm.generate(
-        messages,
-        system_prompt,
-        tools=[get_weather]
-    )
+    # rsp = llm.generate(
+    #     messages,
+    #     system_prompt,
+    #     tools=[get_weather]
+    # )
 
     return rsp
 
