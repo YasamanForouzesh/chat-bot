@@ -2,7 +2,7 @@ from llm_adapter.helper import llmFactory
 from dotenv import load_dotenv
 from prompt_loader import prompt_loader
 from tools import get_weather
-from models import ToolResult, prompt
+from models import Prompt
 load_dotenv()
 
 
@@ -11,7 +11,7 @@ def chat():
     llm = llmFactory("gpt-4.1-nano", "openai")
 
     messages = [
-        prompt(
+        Prompt(
             role="user",
             content="I have a trip to LA in two days. What type of clothes should I take?"
         )
@@ -23,24 +23,6 @@ def chat():
         tools=[get_weather]
     )
 
-    # messages.extend(rsp.tool_calls)
-
-    # for tool_call in rsp.tool_calls:
-    #     if tool_call.name == "get_weather":
-    #         tool_resp = get_weather(**tool_call.arguments)
-
-    #         messages.append(
-    #             ToolResult(
-    #                 call_id=tool_call.id,
-    #                 result=tool_resp
-    #             )
-    #         )
-
-    # rsp = llm.generate(
-    #     messages,
-    #     system_prompt,
-    #     tools=[get_weather]
-    # )
 
     return rsp
 

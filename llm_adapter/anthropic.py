@@ -13,7 +13,7 @@ class Anthropic(BaseAdapter):
         self.client = anthropic.Anthropic()
 
     @staticmethod
-    def validate_messages(messages: list[m.prompt]) -> list[m.prompt]:
+    def validate_messages(messages: list[m.Prompt]) -> list[m.Prompt]:
         allowed_roles = {"user", "assistant"}
         cleaned_messages = []
 
@@ -63,7 +63,7 @@ class Anthropic(BaseAdapter):
             }
         }
     
-    def generate(self, prompt: list[m.prompt], system_prompt: str | None = None,
+    def generate(self, prompt: list[m.Prompt], system_prompt: str | None = None,
                  output_schema: Type[BaseModel] | None = None)-> str | BaseModel:
         
         validated_messages = self.validate_messages(prompt)

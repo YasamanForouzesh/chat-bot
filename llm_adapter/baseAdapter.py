@@ -11,7 +11,7 @@ class BaseAdapter(ABC):
     @abstractmethod
     def generate(
         self,
-        prompt: list[m.prompt | m.ToolResult],
+        prompt: list[m.Prompt | m.ToolResult],
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
         tools: list[m.Tool | dict] | None = None
@@ -20,15 +20,15 @@ class BaseAdapter(ABC):
 
     def agent(
         self,
-        prompt: list[m.prompt | m.ToolCall | m.ToolResult],
+        prompt: list[m.Prompt | m.ToolCall | m.ToolResult],
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
         tools: list[m.Tool | dict] | None = None,
     ) -> str | BaseModel:
-
+        history = list(prompt)
         while True:
             response = self.generate(
-                prompt=prompt,
+                prompt=history,
                 system_prompt=system_prompt,
                 output_schema=output_schema,
                 tools=tools,
@@ -50,8 +50,8 @@ class BaseAdapter(ABC):
 
             # model needs to see both:
             # what it called + what the tool returned
-            prompt.extend(response.tool_calls)
-            prompt.extend(tool_results)
+            history.extend(response.tool_calls)
+            history.extend(tool_results)
     # @abstractmethod
     # def web_search(
     #     self,

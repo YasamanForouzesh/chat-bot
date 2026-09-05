@@ -34,7 +34,7 @@ class OpenAIAdapter(BaseAdapter):
 
     @staticmethod
     def normalize_input(
-        items: list[m.prompt | m.ToolCall | m.ToolResult]
+        items: list[m.Prompt | m.ToolCall | m.ToolResult]
     ) -> list[dict]:
 
         if not items:
@@ -44,7 +44,7 @@ class OpenAIAdapter(BaseAdapter):
 
         for index, item in enumerate(items):
 
-            if isinstance(item, m.prompt):
+            if isinstance(item, m.Prompt):
                 if item.role not in {"user", "assistant", "developer"}:
                     raise ValueError(
                         f"Invalid role '{item.role}' at index {index}"
@@ -80,7 +80,7 @@ class OpenAIAdapter(BaseAdapter):
 
     def generate(
         self,
-        prompt: list[m.prompt | m.ToolCall | m.ToolResult],
+        prompt: list[m.Prompt | m.ToolCall | m.ToolResult],
         system_prompt: str | None = None,
         output_schema: Type[BaseModel] | None = None,
         tools: list[m.Tool | dict] | None = None

@@ -45,7 +45,7 @@ class Tool:
         }
 
 
-class prompt(BaseModel):
+class Prompt(BaseModel):
     role: Literal["user", "assistant", "developer"]
     content: str
 
