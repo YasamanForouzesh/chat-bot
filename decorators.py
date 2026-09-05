@@ -37,14 +37,15 @@ def tool(*, strict: bool = False, additionalProperties: bool = False):
         )
 
         parameters = input_model.model_json_schema()
-
+        parameters["additionalProperties"] = (
+            False if strict else additionalProperties
+        )
         return Tool(
             name=func.__name__,
             description=func.__doc__ or "",
             parameters=parameters,
             func=func,
             strict=strict,
-            additionalProperties=strict if strict else additionalProperties
         )
 
     return decorator

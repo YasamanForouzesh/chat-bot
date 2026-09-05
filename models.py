@@ -30,7 +30,6 @@ class Tool:
     parameters: dict
     func: Callable
     strict: bool = False
-    additionalProperties: bool = False
 
 
     def __call__(self, *args, **kwds):
